@@ -1,0 +1,38 @@
+# Data, generated models, and experiment results can be regenerated.
+data/raw/
+data/processed/
+data/user_defined/*
+data/archive/
+data/archive.zip
+
+models/*.joblib
+outputs/
+
+!data/.gitkeep
+!data/user_defined/.gitkeep
+!models/.gitkeep
+!outputs/.gitkeep
+
+# Python tooling
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Large model files
+*.keras
+*.h5
+*.pt
+*.pth
+*.ckpt
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
