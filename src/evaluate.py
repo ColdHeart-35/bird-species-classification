@@ -49,6 +49,7 @@ from src.data_loader import (
     get_class_names,
     load_class_labels,
 )
+from src.gpu_utils import setup_gpu
 
 RESULTS_DIR = Path("results")
 MODELS_DIR = Path("models")
@@ -315,7 +316,16 @@ def main() -> None:
         default="both",
         help="Which CNN model to evaluate",
     )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="Compare all available models and generate comparison charts",
+    )
     args = parser.parse_args()
+    if args.compare:
+        args.model = "both"
+
+    setup_gpu(verbose=True)
 
     comparison_rows: list[dict] = []
 

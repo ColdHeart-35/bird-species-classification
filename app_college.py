@@ -14,8 +14,10 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 import streamlit as st
+import tensorflow as tf
 from tensorflow import keras
 
 # Ensure project root is in sys.path
@@ -25,6 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.data_loader import IMG_SIZE, load_class_labels, LABEL_MAP_PATH
 from src.predict_cnn import run_inference, MODEL_CONFIGS
+from src.gpu_utils import setup_gpu
 
 TAXONOMY_PATH = Path("data/species_taxonomy.json")
 
@@ -82,6 +85,7 @@ st.markdown(
 @st.cache_resource
 def load_efficientnet_model():
     """Load and cache the trained EfficientNetB0 Keras model from models/efficientnet_finetuned.keras."""
+    setup_gpu(verbose=False)
     model_path = MODEL_CONFIGS["efficientnet"]["path"]
     if not model_path.exists():
         raise FileNotFoundError(f"Trained EfficientNetB0 model not found at {model_path}")
@@ -94,6 +98,57 @@ def load_labels():
     if not LABEL_MAP_PATH.exists():
         raise FileNotFoundError(f"Class labels map not found at {LABEL_MAP_PATH}")
     return load_class_labels(LABEL_MAP_PATH)
+
+
+@st.cache_resource
+def load_bird_gate_model():
+    """Load a lightweight MobileNetV2 (ImageNet) used to pre-screen whether an image contains a bird."""
+    from tensorflow.keras.applications import MobileNetV2
+    return MobileNetV2(weights="imagenet", include_top=True)
+
+
+def is_likely_bird(raw_bytes: bytes, gate_model) -> tuple[bool, str]:
+    """
+    Run a pretrained ImageNet classifier (MobileNetV2) on the image.
+    Returns (True, label) if the top-5 predictions contain any bird-related class,
+    otherwise returns (False, top_label).
+    This prevents the fine-tuned model from ever seeing non-bird inputs.
+    """
+    from tensorflow.keras.applications.mobilenet_v2 import (
+        preprocess_input,
+        decode_predictions,
+    )
+
+    BIRD_KEYWORDS = {
+        "bird", "robin", "finch", "warbler", "sparrow", "hawk", "eagle", "owl",
+        "duck", "goose", "hen", "cock", "rooster", "turkey", "crane", "heron",
+        "kingfisher", "jay", "magpie", "raven", "crow", "mynah", "myna",
+        "peacock", "parrot", "macaw", "cockatoo", "lorikeet", "kite", "vulture",
+        "pelican", "flamingo", "ibis", "stork", "hornbill", "toucan",
+        "woodpecker", "swift", "swallow", "pigeon", "dove", "cuckoo",
+        "partridge", "quail", "pheasant", "grouse", "bulbul", "junco",
+        "bunting", "chickadee", "ouzel", "brambling", "goldfinch", "ostrich",
+        "albatross", "penguin", "puffin", "kookaburra", "sunbird", "bee eater",
+        "bee_eater", "drongo", "tailorbird", "munia", "starling", "oriole",
+    }
+
+    try:
+        img = tf.image.decode_image(raw_bytes, channels=3, expand_animations=False)
+        img = tf.image.resize(img, (224, 224))
+        img_array = preprocess_input(np.expand_dims(img.numpy().astype("float32"), 0))
+        preds = gate_model.predict(img_array, verbose=0)
+        top5 = decode_predictions(preds, top=5)[0]   # [(id, label, prob), ...]
+    except Exception:
+        # If gate fails for any reason, allow through (fail open)
+        return True, "unknown"
+
+    top_label = top5[0][1].replace("_", " ")
+    for _, label, _ in top5:
+        words = label.lower().replace("_", " ")
+        if any(kw in words for kw in BIRD_KEYWORDS):
+            return True, label.replace("_", " ")
+
+    return False, top_label
 
 
 @st.cache_data
@@ -183,7 +238,7 @@ def render_taxonomy_card(tax_info: dict, species_name: str):
 # ──────────────────────────────────────────────
 # Page Renderers
 # ──────────────────────────────────────────────
-def page_species_identifier(model, class_labels, taxonomy_data, metrics):
+def page_species_identifier(model, class_labels, taxonomy_data, metrics, gate_model):
     """Main Species Identifier page."""
     st.header("Bird Species Identifier")
     st.caption(
@@ -218,6 +273,8 @@ def page_species_identifier(model, class_labels, taxonomy_data, metrics):
                 # Clear session state when no file is uploaded
                 st.session_state.pop("current_file_key", None)
                 st.session_state.pop("last_result", None)
+                st.session_state.pop("gate_rejected", None)
+                st.session_state.pop("gate_label", None)
             else:
                 file_key = f"{uploaded_file.name}_{uploaded_file.size}"
 
@@ -232,33 +289,52 @@ def page_species_identifier(model, class_labels, taxonomy_data, metrics):
                     elif class_labels is None:
                         st.error("Class labels file not found!")
                     else:
-                        with st.spinner("Processing image through EfficientNetB0..."):
+                        with st.spinner("Checking image..."):
                             raw_bytes = uploaded_file.getvalue()
-                            # Run exact existing inference pipeline from src/predict_cnn.py
-                            result = run_inference(
-                                image_input=raw_bytes,
-                                model=model,
-                                class_labels=class_labels,
-                                img_size=IMG_SIZE,
-                                top_k=3,
-                            )
+                            gate_ok, detected_label = is_likely_bird(raw_bytes, gate_model)
+
+                        if not gate_ok:
+                            # Non-bird image — block before fine-tuned model runs
+                            st.session_state["last_result"] = None
+                            st.session_state["gate_rejected"] = True
+                            st.session_state["gate_label"] = detected_label
+                            st.session_state["current_file_key"] = file_key
+                        else:
+                            with st.spinner("Identifying species via EfficientNetB0..."):
+                                result = run_inference(
+                                    image_input=raw_bytes,
+                                    model=model,
+                                    class_labels=class_labels,
+                                    img_size=IMG_SIZE,
+                                    top_k=3,
+                                )
                             st.session_state["last_result"] = result
+                            st.session_state["gate_rejected"] = False
                             st.session_state["current_file_key"] = file_key
                 else:
                     result = st.session_state.get("last_result")
 
-                if result is not None:
+                # ── Display result ───────────────────────
+                if st.session_state.get("gate_rejected"):
+                    detected = st.session_state.get("gate_label", "non-bird object")
+                    st.markdown("#### Predicted Species")
+                    st.error("🚫 No bird detected in this image")
+                    st.caption(
+                        f"ImageNet pre-screener identified this as: **{detected}**. "
+                        "Please upload a clear photograph of a bird."
+                    )
+                elif result is not None:
+                    conf_val = result["confidence"] * 100
                     st.markdown("#### Predicted Species")
                     st.markdown(f"### :blue[{result['predicted_species']}]")
-
                     st.markdown("#### Confidence")
-                    conf_val = result["confidence"] * 100
                     st.markdown(f"### {conf_val:.2f}%")
 
     # Prediction Details (Top-3 Predictions) & Taxonomy Classification
-    if uploaded_file is not None and st.session_state.get("last_result") is not None:
-        res = st.session_state["last_result"]
-
+    # Only shown when the gate passed AND the fine-tuned model returned a result
+    res = st.session_state.get("last_result")
+    gate_rejected = st.session_state.get("gate_rejected", False)
+    if uploaded_file is not None and res is not None and not gate_rejected:
         st.markdown("---")
         st.subheader("Prediction Details")
         st.write("**Top 3 Predictions**")
@@ -273,7 +349,6 @@ def page_species_identifier(model, class_labels, taxonomy_data, metrics):
             with c2:
                 st.write(f"**{conf_pct:.2f}%**")
 
-        # Dynamic Taxonomy Section for Predicted Bird
         st.markdown("---")
         raw_class = res.get("raw_class", "")
         tax_info = taxonomy_data.get(raw_class, {})
@@ -477,6 +552,7 @@ def main():
 
     # Load Resources
     model = load_efficientnet_model()
+    gate_model = load_bird_gate_model()
     class_labels = load_labels()
     taxonomy_data = load_taxonomy_data()
     metrics = load_project_metrics()
@@ -484,7 +560,7 @@ def main():
     if nav_option == "🏠 Home":
         page_home()
     elif nav_option == "🔍 Species Identifier":
-        page_species_identifier(model, class_labels, taxonomy_data, metrics)
+        page_species_identifier(model, class_labels, taxonomy_data, metrics, gate_model)
     elif nav_option == "🧬 Taxonomy Classification":
         page_taxonomy_classification(taxonomy_data)
     elif nav_option == "📊 Model Performance":

@@ -1,51 +1,51 @@
 {
   "model": "EfficientNetB0 Fine-Tuned",
   "test_accuracy": 0.962,
-  "macro_precision": 0.9633905765368218,
-  "macro_recall": 0.9619999999999999,
-  "macro_f1": 0.9621272696233736,
-  "weighted_f1": 0.9621272696233735,
+  "macro_precision": 0.9629876691913165,
+  "macro_recall": 0.9620000000000001,
+  "macro_f1": 0.962023430822638,
+  "weighted_f1": 0.9620234308226379,
   "classification_report": {
     "Asian-Green-Bee-Eater": {
-      "precision": 0.9836065573770492,
-      "recall": 1.0,
-      "f1-score": 0.9917355371900827,
+      "precision": 0.9833333333333333,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9833333333333333,
       "support": 60.0
     },
     "Brown-Headed-Barbet": {
+      "precision": 0.9666666666666667,
+      "recall": 0.9666666666666667,
+      "f1-score": 0.9666666666666667,
+      "support": 60.0
+    },
+    "Cattle-Egret": {
       "precision": 0.9508196721311475,
       "recall": 0.9666666666666667,
       "f1-score": 0.9586776859504132,
       "support": 60.0
     },
-    "Cattle-Egret": {
-      "precision": 0.9655172413793104,
-      "recall": 0.9333333333333333,
-      "f1-score": 0.9491525423728814,
+    "Common-Kingfisher": {
+      "precision": 0.9830508474576272,
+      "recall": 0.9666666666666667,
+      "f1-score": 0.9747899159663865,
       "support": 60.0
     },
-    "Common-Kingfisher": {
+    "Common-Myna": {
       "precision": 1.0,
       "recall": 0.9333333333333333,
       "f1-score": 0.9655172413793104,
       "support": 60.0
     },
-    "Common-Myna": {
-      "precision": 1.0,
-      "recall": 0.95,
-      "f1-score": 0.9743589743589743,
-      "support": 60.0
-    },
     "Common-Rosefinch": {
-      "precision": 0.9322033898305084,
+      "precision": 0.9482758620689655,
       "recall": 0.9166666666666666,
-      "f1-score": 0.9243697478991597,
+      "f1-score": 0.9322033898305084,
       "support": 60.0
     },
     "Common-Tailorbird": {
-      "precision": 0.855072463768116,
-      "recall": 0.9833333333333333,
-      "f1-score": 0.9147286821705426,
+      "precision": 0.8529411764705882,
+      "recall": 0.9666666666666667,
+      "f1-score": 0.90625,
       "support": 60.0
     },
     "Coppersmith-Barbet": {
@@ -62,62 +62,62 @@
     },
     "Gray-Wagtail": {
       "precision": 1.0,
-      "recall": 0.9666666666666667,
-      "f1-score": 0.9830508474576272,
+      "recall": 1.0,
+      "f1-score": 1.0,
       "support": 60.0
     },
     "Hoopoe": {
+      "precision": 0.9833333333333333,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9833333333333333,
+      "support": 60.0
+    },
+    "House-Crow": {
+      "precision": 0.8939393939393939,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9365079365079365,
+      "support": 60.0
+    },
+    "Indian-Grey-Hornbill": {
+      "precision": 0.9433962264150944,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.8849557522123894,
+      "support": 60.0
+    },
+    "Indian-Peacock": {
+      "precision": 0.9661016949152542,
+      "recall": 0.95,
+      "f1-score": 0.957983193277311,
+      "support": 60.0
+    },
+    "Indian-Pitta": {
       "precision": 0.9830508474576272,
       "recall": 0.9666666666666667,
       "f1-score": 0.9747899159663865,
       "support": 60.0
     },
-    "House-Crow": {
-      "precision": 0.8656716417910447,
-      "recall": 0.9666666666666667,
-      "f1-score": 0.9133858267716536,
-      "support": 60.0
-    },
-    "Indian-Grey-Hornbill": {
-      "precision": 0.9629629629629629,
-      "recall": 0.8666666666666667,
-      "f1-score": 0.9122807017543859,
-      "support": 60.0
-    },
-    "Indian-Peacock": {
-      "precision": 0.9666666666666667,
-      "recall": 0.9666666666666667,
-      "f1-score": 0.9666666666666667,
-      "support": 60.0
-    },
-    "Indian-Pitta": {
-      "precision": 0.9508196721311475,
-      "recall": 0.9666666666666667,
-      "f1-score": 0.9586776859504132,
-      "support": 60.0
-    },
     "Indian-Roller": {
-      "precision": 0.9523809523809523,
-      "recall": 1.0,
-      "f1-score": 0.975609756097561,
+      "precision": 0.9672131147540983,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9752066115702479,
       "support": 60.0
     },
     "Jungle-Babbler": {
-      "precision": 0.9491525423728814,
-      "recall": 0.9333333333333333,
-      "f1-score": 0.9411764705882353,
+      "precision": 0.9193548387096774,
+      "recall": 0.95,
+      "f1-score": 0.9344262295081968,
       "support": 60.0
     },
     "Northern-Lapwing": {
-      "precision": 0.967741935483871,
+      "precision": 0.9836065573770492,
       "recall": 1.0,
-      "f1-score": 0.9836065573770492,
+      "f1-score": 0.9917355371900827,
       "support": 60.0
     },
     "Red-Wattled-Lapwing": {
-      "precision": 1.0,
+      "precision": 0.9830508474576272,
       "recall": 0.9666666666666667,
-      "f1-score": 0.9830508474576272,
+      "f1-score": 0.9747899159663865,
       "support": 60.0
     },
     "Ruddy-Shelduck": {
@@ -133,9 +133,9 @@
       "support": 60.0
     },
     "Sarus-Crane": {
-      "precision": 0.9491525423728814,
-      "recall": 0.9333333333333333,
-      "f1-score": 0.9411764705882353,
+      "precision": 0.9322033898305084,
+      "recall": 0.9166666666666666,
+      "f1-score": 0.9243697478991597,
       "support": 60.0
     },
     "White-Breasted-Kingfisher": {
@@ -145,28 +145,28 @@
       "support": 60.0
     },
     "White-Breasted-Waterhen": {
-      "precision": 0.9666666666666667,
+      "precision": 0.9354838709677419,
       "recall": 0.9666666666666667,
-      "f1-score": 0.9666666666666667,
+      "f1-score": 0.9508196721311475,
       "support": 60.0
     },
     "White-Wagtail": {
-      "precision": 0.967741935483871,
-      "recall": 1.0,
-      "f1-score": 0.9836065573770492,
+      "precision": 0.9833333333333333,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9833333333333333,
       "support": 60.0
     },
     "accuracy": 0.962,
     "macro avg": {
-      "precision": 0.9633905765368218,
-      "recall": 0.9619999999999999,
-      "f1-score": 0.9621272696233736,
+      "precision": 0.9629876691913165,
+      "recall": 0.9620000000000001,
+      "f1-score": 0.962023430822638,
       "support": 1500.0
     },
     "weighted avg": {
-      "precision": 0.9633905765368218,
+      "precision": 0.9629876691913164,
       "recall": 0.962,
-      "f1-score": 0.9621272696233735,
+      "f1-score": 0.9620234308226379,
       "support": 1500.0
     }
   }

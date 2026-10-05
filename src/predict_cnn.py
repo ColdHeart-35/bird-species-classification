@@ -33,6 +33,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 from src.data_loader import IMG_SIZE, IMG_SIZE_BASELINE, load_class_labels, LABEL_MAP_PATH
+from src.gpu_utils import setup_gpu
 
 MODELS_DIR = Path("models")
 
@@ -151,6 +152,8 @@ def predict(
             f"Class label map not found at {LABEL_MAP_PATH}.\n"
             f"Run training first to generate the label map."
         )
+
+    setup_gpu(verbose=True)
 
     # Load model and labels
     model = keras.models.load_model(str(cfg["path"]))

@@ -38,6 +38,7 @@ from src.data_loader import (
     get_class_names,
     save_class_labels,
 )
+from src.gpu_utils import setup_gpu
 
 RESULTS_DIR = Path("results")
 MODELS_DIR = Path("models")
@@ -133,6 +134,9 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
     parser.add_argument("--model-path", type=Path, default=MODELS_DIR / "baseline_cnn.keras")
     args = parser.parse_args()
+
+    # ── Initialize GPU ────────────────────────────
+    setup_gpu(verbose=True)
 
     # ── Build data pipeline ──────────────────────
     print("\n" + "=" * 60)

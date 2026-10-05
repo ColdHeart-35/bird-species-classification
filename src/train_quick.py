@@ -44,6 +44,7 @@ from src.data_loader import (
     _make_augmenter,
     AUTOTUNE,
 )
+from src.gpu_utils import setup_gpu
 
 RESULTS_DIR = Path("results")
 MODELS_DIR  = Path("models")
@@ -402,6 +403,9 @@ def main() -> None:
     parser.add_argument("--stage1-epochs", type=int, default=15)
     parser.add_argument("--stage2-epochs", type=int, default=25)
     args = parser.parse_args()
+
+    # ── Initialize GPU ────────────────────────────
+    setup_gpu(verbose=True)
 
     class_names = get_class_names()
     save_class_labels(class_names)

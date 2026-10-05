@@ -50,6 +50,7 @@ from tensorflow import keras
 from tensorflow.keras.applications import EfficientNetB0
 
 from src.data_loader import IMG_SIZE, build_datasets
+from src.gpu_utils import setup_gpu
 
 RESULTS_DIR = Path("results")
 MODELS_DIR = Path("models")
@@ -216,6 +217,9 @@ def main() -> None:
     args = parser.parse_args()
 
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # ── Initialize GPU ────────────────────────────
+    setup_gpu(verbose=True)
 
     # ── Build data pipeline ──────────────────────
     print("\n" + "=" * 60)
